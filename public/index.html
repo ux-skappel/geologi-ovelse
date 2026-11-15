@@ -16,15 +16,11 @@
 
 <section id="auth" class="wrap hidden">
   <div class="card narrow">
-    <h1>Logg inn</h1>
-    <p class="mut">Øv til eksamen i TGB4100 Geologi, innføring. Fremgangen din lagres, du får et karakterestimat etter NTNU-skalaen og beskjed når du er klar for karakteren du sikter mot.</p>
+    <h1>Hvem er du?</h1>
+    <p class="mut">Øv til eksamen i TGB4100 Geologi, innføring. Skriv et brukernavn, så lagres fremgangen din. Bruk samme navn neste gang (også på en annen enhet) for å fortsette der du slapp. Ingen passord, ingen e-post.</p>
     <form id="authForm">
-      <label>E-post<input type="email" id="email" required autocomplete="email"></label>
-      <label>Passord<input type="password" id="password" required minlength="6" autocomplete="current-password"></label>
-      <div class="row">
-        <button class="btn" type="submit" id="loginBtn">Logg inn</button>
-        <button class="btn sec" type="button" id="signupBtn">Lag konto</button>
-      </div>
+      <label>Brukernavn<input type="text" id="username" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="f.eks. eskil"></label>
+      <div class="row"><button class="btn" type="submit">Start</button></div>
       <p id="authMsg" class="mut"></p>
     </form>
   </div>

@@ -18,7 +18,13 @@ const opts = q => q.o === "TF" ? TF : q.o;
 const gradeOf = p => GRADES.find(([, t]) => p >= t)[0];
 const threshold = g => (GRADES.find(([x]) => x === g) || ["F", 0])[1];
 
-// ---------- oppstart og innlogging ----------
+// ---------- oppstart og innlogging (bare brukernavn) ----------
+const LS_KEY = "geologi_bruker";
+const normName = s => s.trim().toLowerCase().replace(/\s+/g, "-");
+const validName = s => /^[a-z0-9æøå._-]{2,30}$/.test(s);
+const lsGet = () => { try { return localStorage.getItem(LS_KEY); } catch { return null; } };
+const lsSet = v => { try { v ? localStorage.setItem(LS_KEY, v) : localStorage.removeItem(LS_KEY); } catch {} };
+
 (async function init() {
   let cfg;
   try { cfg = await (await fetch("/api/config")).json(); } catch (e) { cfg = {}; }
@@ -26,25 +32,29 @@ const threshold = g => (GRADES.find(([x]) => x === g) || ["F", 0])[1];
     document.body.insertAdjacentHTML("beforeend", `<div class="wrap"><div class="card"><h1>Mangler oppsett</h1><p>Miljøvariablene <code>SUPABASE_URL</code> og <code>SUPABASE_ANON_KEY</code> er ikke satt i Vercel.</p></div></div>`);
     return;
   }
-  sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
-  sb.auth.onAuthStateChange((_e, session) => setUser(session?.user || null));
-  const { data } = await sb.auth.getSession();
-  setUser(data.session?.user || null);
+  sb = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const saved = lsGet();
+  if (saved && validName(saved)) await login(saved); else showLogin();
 })();
 
-async function setUser(u) {
-  if (u && user && u.id === user.id) return;
-  user = u;
-  if (!user) {
-    $("#auth").classList.remove("hidden");
-    ["#nav", "#main"].forEach(s => $(s).classList.add("hidden"));
-    $("#who").innerHTML = "";
-    return;
-  }
+function showLogin(msg) {
+  user = null;
+  $("#auth").classList.remove("hidden");
+  ["#nav", "#main"].forEach(s => $(s).classList.add("hidden"));
+  $("#who").innerHTML = "";
+  $("#authMsg").textContent = msg || "";
+  $("#username").focus();
+}
+
+async function login(name) {
+  const { error } = await sb.from("players").upsert({ username: name }, { onConflict: "username", ignoreDuplicates: true });
+  if (error) { showLogin("Fikk ikke kontakt med databasen. Prøv igjen."); console.error(error); return; }
+  user = { name };
+  lsSet(name);
   $("#auth").classList.add("hidden");
   ["#nav", "#main"].forEach(s => $(s).classList.remove("hidden"));
-  $("#who").innerHTML = `<span>${esc(user.email)}</span><button id="logout">Logg ut</button>`;
-  $("#logout").onclick = () => sb.auth.signOut();
+  $("#who").innerHTML = `<span>${esc(name)}</span><button id="logout">Bytt bruker</button>`;
+  $("#logout").onclick = () => { lsSet(null); showLogin(); };
   await loadData();
   renderTabs();
   show(view);
@@ -52,33 +62,26 @@ async function setUser(u) {
 
 $("#authForm").onsubmit = async e => {
   e.preventDefault();
-  const { error } = await sb.auth.signInWithPassword({ email: $("#email").value, password: $("#password").value });
-  $("#authMsg").textContent = error ? "Kunne ikke logge inn: " + error.message : "";
-};
-$("#signupBtn").onclick = async () => {
-  const email = $("#email").value, password = $("#password").value;
-  if (!email || password.length < 6) { $("#authMsg").textContent = "Skriv inn e-post og et passord på minst 6 tegn."; return; }
-  const { data, error } = await sb.auth.signUp({ email, password, options: { emailRedirectTo: location.origin } });
-  if (error) $("#authMsg").textContent = "Kunne ikke lage konto: " + error.message;
-  else if (!data.session) $("#authMsg").textContent = "Konto laget. Sjekk e-posten din og trykk på bekreftelseslenken, så kan du logge inn.";
+  const name = normName($("#username").value);
+  if (!validName(name)) { $("#authMsg").textContent = "Brukernavnet må være 2–30 tegn: bokstaver, tall, punktum, bindestrek eller understrek."; return; }
+  await login(name);
 };
 
 async function loadData() {
   const [a, ex, p] = await Promise.all([
-    sb.from("answers").select("question_id,topic,correct,created_at").order("created_at", { ascending: false }).limit(10000),
-    sb.from("exams").select("score,total,created_at").order("created_at", { ascending: false }).limit(50),
-    sb.from("profiles").select("target_grade").maybeSingle()
+    sb.from("answers").select("question_id,topic,correct,created_at").eq("username", user.name).order("created_at", { ascending: false }).limit(10000),
+    sb.from("exams").select("score,total,created_at").eq("username", user.name).order("created_at", { ascending: false }).limit(50),
+    sb.from("players").select("target_grade").eq("username", user.name).maybeSingle()
   ]);
   answers = a.data || [];
   exams = ex.data || [];
-  if (p.data) profile = p.data;
-  else await sb.from("profiles").upsert({ user_id: user.id, target_grade: "C" });
+  profile = p.data || { target_grade: "C" };
 }
 
 async function logAnswers(rows) {
   const now = new Date().toISOString();
   rows.forEach(r => answers.unshift({ ...r, created_at: now }));
-  const { error } = await sb.from("answers").insert(rows.map(r => ({ ...r, user_id: user.id })));
+  const { error } = await sb.from("answers").insert(rows.map(r => ({ ...r, username: user.name })));
   if (error) console.error(error);
 }
 
@@ -209,15 +212,14 @@ function viewOverview() {
   $("#coachGo").onclick = () => { if (c.action.topic) { show("tema"); runTopic(c.action.topic); } else show(c.action.view); };
   $("#target").onchange = async e => {
     profile.target_grade = e.target.value;
-    await sb.from("profiles").upsert({ user_id: user.id, target_grade: profile.target_grade, updated_at: new Date().toISOString() });
+    await sb.from("players").update({ target_grade: profile.target_grade, updated_at: new Date().toISOString() }).eq("username", user.name);
     viewOverview();
   };
   $("#main").querySelectorAll("[data-topic]").forEach(b => b.onclick = () => { show("tema"); runTopic(b.dataset.topic); });
   let armed = false;
   $("#resetBtn").onclick = async () => {
     if (!armed) { armed = true; $("#resetMsg").textContent = "Trykk én gang til for å slette alle svar og prøveeksamener."; return; }
-    await sb.from("answers").delete().eq("user_id", user.id);
-    await sb.from("exams").delete().eq("user_id", user.id);
+    await sb.rpc("reset_progress", { p_username: user.name });
     answers = []; exams = []; viewOverview();
   };
 }
@@ -331,7 +333,7 @@ function startExam() {
       rows.push({ question_id: q.id, topic: q.t, correct: right, mode: "exam" });
     });
       await logAnswers(rows);
-    const { error } = await sb.from("exams").insert({ user_id: user.id, score: ok, total: qs.length });
+    const { error } = await sb.from("exams").insert({ username: user.name, score: ok, total: qs.length });
     if (!error) exams.unshift({ score: ok, total: qs.length, created_at: new Date().toISOString() });
     const pct = Math.round(100 * ok / qs.length), g = gradeOf(pct), th = threshold(profile.target_grade);
     const trows = Object.entries(topic).sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).map(([t, [a, n]]) => `<tr><td>${esc(t)}</td><td>${a}/${n}</td></tr>`).join("");

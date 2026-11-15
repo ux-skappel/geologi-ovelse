@@ -1,63 +1,46 @@
--- Kjør hele denne filen i Supabase: SQL Editor → New query → lim inn → Run.
-
-create table if not exists public.profiles (
-  user_id uuid primary key references auth.users(id) on delete cascade,
+-- Brukernavn uten passord. Kjør i Supabase: SQL Editor → New query → lim inn → Run.
+create table if not exists public.players (
+  username text primary key check (username ~ '^[a-z0-9æøå._-]{2,30}$'),
   target_grade text not null default 'C' check (target_grade in ('A','B','C','D','E')),
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
 create table if not exists public.answers (
   id bigint generated always as identity primary key,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  question_id text not null,
-  topic text not null,
+  username text not null references public.players(username) on delete cascade,
+  question_id text not null check (length(question_id) <= 20),
+  topic text not null check (length(topic) <= 60),
   correct boolean not null,
   mode text not null check (mode in ('exam','topic','weak')),
   created_at timestamptz not null default now()
 );
-create index if not exists answers_user_idx on public.answers(user_id, created_at desc);
-
+create index if not exists answers_user_idx on public.answers(username, created_at desc);
 create table if not exists public.exams (
   id bigint generated always as identity primary key,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  score int not null,
-  total int not null,
+  username text not null references public.players(username) on delete cascade,
+  score int not null check (score >= 0 and score <= total),
+  total int not null check (total between 1 and 200),
   created_at timestamptz not null default now()
 );
+create index if not exists exams_user_idx on public.exams(username, created_at desc);
 
-create table if not exists public.tutor_messages (
-  id bigint generated always as identity primary key,
-  user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
-  created_at timestamptz not null default now()
-);
-create index if not exists tutor_user_idx on public.tutor_messages(user_id, created_at desc);
-
-alter table public.profiles enable row level security;
+alter table public.players enable row level security;
 alter table public.answers enable row level security;
 alter table public.exams enable row level security;
-alter table public.tutor_messages enable row level security;
 
--- Hver bruker ser og skriver bare sine egne rader.
-drop policy if exists "own profile" on public.profiles;
-create policy "own profile" on public.profiles for all
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- Ingen passord: alle kan lese og legge til, men ikke slette eller endre svar direkte.
+create policy "players read" on public.players for select to anon using (true);
+create policy "players insert" on public.players for insert to anon with check (true);
+create policy "players update" on public.players for update to anon using (true) with check (true);
+create policy "answers read" on public.answers for select to anon using (true);
+create policy "answers insert" on public.answers for insert to anon with check (true);
+create policy "exams read" on public.exams for select to anon using (true);
+create policy "exams insert" on public.exams for insert to anon with check (true);
 
-drop policy if exists "read own answers" on public.answers;
-drop policy if exists "insert own answers" on public.answers;
-drop policy if exists "delete own answers" on public.answers;
-create policy "read own answers" on public.answers for select using (auth.uid() = user_id);
-create policy "insert own answers" on public.answers for insert with check (auth.uid() = user_id);
-create policy "delete own answers" on public.answers for delete using (auth.uid() = user_id);
-
-drop policy if exists "read own exams" on public.exams;
-drop policy if exists "insert own exams" on public.exams;
-drop policy if exists "delete own exams" on public.exams;
-create policy "read own exams" on public.exams for select using (auth.uid() = user_id);
-create policy "insert own exams" on public.exams for insert with check (auth.uid() = user_id);
-create policy "delete own exams" on public.exams for delete using (auth.uid() = user_id);
-
--- Lærer-meldinger: kun lese og legge til (ikke slette), så dagsgrensen ikke kan omgås.
-drop policy if exists "read own tutor" on public.tutor_messages;
-drop policy if exists "insert own tutor" on public.tutor_messages;
-create policy "read own tutor" on public.tutor_messages for select using (auth.uid() = user_id);
-create policy "insert own tutor" on public.tutor_messages for insert with check (auth.uid() = user_id);
+create or replace function public.reset_progress(p_username text)
+returns void language sql security definer set search_path = public as $$
+  delete from public.answers where username = p_username;
+  delete from public.exams where username = p_username;
+$$;
+revoke all on function public.reset_progress(text) from public;
+grant execute on function public.reset_progress(text) to anon;

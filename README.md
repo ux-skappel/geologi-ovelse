@@ -7,7 +7,7 @@
 - **Øv på tema** (30 spørsmål per runde) og **Øv på svake punkter**: fasit med én gang. Spørsmål du har svart feil på kommer først, og utvalget varierer fra gang til gang
 - **Min fremgang**: karakterestimat etter NTNUs prosentskala (A ≥ 89, B ≥ 77, C ≥ 65, D ≥ 53, E ≥ 41) og beskjed når du er klar for karakteren du sikter mot
 - **Lærerens vurdering**: en automatisk lærer (regelbasert, ingen AI-kostnad) som forteller hvordan du ligger an, hva som er svakest, om du er i fremgang og hva du bør gjøre nå
-- Innlogging og lagring med **Supabase**, hosting med **Vercel**
+- Innlogging med **bare brukernavn** (ingen passord eller e-post). Lagring i **Supabase**, hosting på **Vercel**
 
 ## Oppsett
 
@@ -15,8 +15,6 @@
 1. Gå til supabase.com og velg et prosjekt (eller lag et nytt).
 2. Åpne **SQL Editor → New query**, lim inn hele `supabase/schema.sql` og trykk **Run**.
 3. Gå til **Project Settings → API** og noter **Project URL** og **anon public key**.
-4. Gå til **Authentication → URL Configuration** og sett **Site URL** til Vercel-adressen din (fra steg 2). Da peker lenken i bekreftelses-e-posten riktig.
-   - Vil du slippe e-postbekreftelse? Slå av «Confirm email» under **Authentication → Providers → Email**.
 
 ### 2. Vercel
 1. Gå til vercel.com → **Add New → Project** og importer GitHub-repoet `geologi-ovelse`.
