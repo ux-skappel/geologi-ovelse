@@ -10,7 +10,6 @@ const MARGIN = 5;         // prosentpoeng sikkerhetsmargin over grensen før «k
 const EXAM_LEN = 50;
 
 let sb, user, profile = { target_grade: "C" }, answers = [], exams = [], view = "oversikt";
-let tutorMsgs = [], tutorCtx = null;
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -38,12 +37,12 @@ async function setUser(u) {
   user = u;
   if (!user) {
     $("#auth").classList.remove("hidden");
-    ["#nav", "#main", "#tutorFab", "#tutorPanel"].forEach(s => $(s).classList.add("hidden"));
+    ["#nav", "#main"].forEach(s => $(s).classList.add("hidden"));
     $("#who").innerHTML = "";
     return;
   }
   $("#auth").classList.add("hidden");
-  ["#nav", "#main", "#tutorFab"].forEach(s => $(s).classList.remove("hidden"));
+  ["#nav", "#main"].forEach(s => $(s).classList.remove("hidden"));
   $("#who").innerHTML = `<span>${esc(user.email)}</span><button id="logout">Logg ut</button>`;
   $("#logout").onclick = () => sb.auth.signOut();
   await loadData();
@@ -108,6 +107,60 @@ function readiness(est) {
   return { target, th, ready: checks.every(c => c.ok), checks };
 }
 
+
+// ---------- automatisk lærer (regelbasert, ingen AI) ----------
+function trend() {
+  const a = answers.slice(0, 20), b = answers.slice(20, 40);
+  if (a.length < 20 || b.length < 20) return null;
+  const pa = 100 * a.filter(x => x.correct).length / 20, pb = 100 * b.filter(x => x.correct).length / 20;
+  return Math.round(pa - pb);
+}
+function coach() {
+  const est = estimate(), r = readiness(est), th = r.th, target = r.target;
+  const tried = est.topics.filter(x => x.pct != null);
+  const weak = [...tried].sort((a, b) => a.pct - b.pct).slice(0, 3);
+  const strong = [...tried].sort((a, b) => b.pct - a.pct)[0];
+  const lines = []; let action = null;
+  if (!answers.length) {
+    return { head: "Velkommen! La oss finne ut hvor du står.", lines: ["Start med en prøveeksamen. Den dekker alle temaene, og etterpå vet jeg hvor du bør begynne.", "Ingen stress hvis det går dårlig første gang. Poenget er å finne hullene."], action: { label: "Start prøveeksamen", view: "eksamen" } };
+  }
+  let head;
+  if (r.ready) head = `Du er klar for ${target}. Godt jobbet!`;
+  else if (est.pct >= th) head = `Du ligger rundt ${est.grade} nå, og er ${est.pct - th} poeng over grensen for ${target}, men ikke helt trygg ennå.`;
+  else head = `Du ligger rundt ${est.grade} nå (${est.pct} %). Det mangler ${th - est.pct} prosentpoeng til ${target}.`;
+  const t = trend();
+  if (t != null && t >= 5) lines.push(`Du er i fremgang: de siste 20 svarene dine er ${t} prosentpoeng bedre enn de 20 før.`);
+  else if (t != null && t <= -5) lines.push(`De siste 20 svarene dine er ${-t} prosentpoeng svakere enn de 20 før. Kanskje på tide med en pause, eller å lese forklaringene grundigere?`);
+  const missing = est.missing.filter(x => x.n === 0);
+  if (missing.length) {
+    lines.push(`Du har ikke øvd på ${missing.length === 1 ? "temaet" : "disse temaene"} ennå: ${missing.map(x => x.t).join(", ")}. Det er gratispoeng du ikke har hentet.`);
+    action = { label: `Øv på ${missing[0].t}`, topic: missing[0].t };
+  }
+  if (weak.length && weak[0].pct < th) {
+    lines.push(`Svakest nå: ${weak.filter(x => x.pct < th).map(x => `${x.t} (${x.pct} %)`).join(", ")}. Her er det mest å hente.`);
+    if (!action) action = { label: `Øv på ${weak[0].t}`, topic: weak[0].t };
+  }
+  if (strong && strong.pct >= 80) lines.push(`Sterkest: ${strong.t} (${strong.pct} %). Det sitter, så bruk tiden på resten.`);
+  const sinceExam = exams[0] ? answers.filter(a => a.created_at > exams[0].created_at).length : answers.length;
+  if (!exams.length && answers.length >= 30) {
+    lines.push("Du har ikke tatt en prøveeksamen ennå. Den viser om nivået holder når temaene blandes, slik som på eksamen.");
+    if (!action) action = { label: "Ta prøveeksamen", view: "eksamen" };
+  } else if (exams.length && sinceExam >= 60) {
+    lines.push(`Du har svart på ${sinceExam} spørsmål siden forrige prøveeksamen. Ta en ny og se om øvingen har gitt uttelling.`);
+    if (!action) action = { label: "Ta ny prøveeksamen", view: "eksamen" };
+  }
+  if (r.ready) lines.push("Hold nivået ved: ta en prøveeksamen om dagen og øv litt på det svakeste temaet. Eller sett målet ett hakk høyere?");
+  if (!action) action = weak.length ? { label: `Øv på svake punkter`, view: "svake" } : { label: "Ta prøveeksamen", view: "eksamen" };
+  return { head, lines, action };
+}
+function roundFeedback(title, ok, n, prevPct) {
+  const pct = Math.round(100 * ok / n), g = gradeOf(pct), th = threshold(profile.target_grade);
+  let msg = `${ok}/${n} riktige (${pct} %), som tilsvarer ${g}.`;
+  if (prevPct != null) msg += pct > prevPct ? ` Det er bedre enn snittet ditt på temaet før denne runden (${prevPct} %).` : pct < prevPct ? ` Det er litt under snittet ditt på temaet før denne runden (${prevPct} %).` : "";
+  msg += pct >= th ? ` Det holder for målet ditt (${profile.target_grade}).` : ` Under grensen for ${profile.target_grade} (${th} %). Les forklaringene på de du bommet på, og ta en runde til. Spørsmålene du svarte feil på kommer først neste gang.`;
+  return msg;
+}
+
 // ---------- navigasjon ----------
 const VIEWS = [["oversikt", "Min fremgang"], ["eksamen", "Prøveeksamen"], ["tema", "Øv på tema"], ["svake", "Øv på svake punkter"], ["huskeliste", "Huskeliste"]];
 function renderTabs() {
@@ -132,7 +185,12 @@ function viewOverview() {
     <td>${x.pct == null ? "–" : x.pct + " %"}</td><td>${x.pct == null ? "–" : gradeOf(x.pct)}</td>
     <td class="mut">${x.total} svar</td>
     <td><button class="btn sec small" data-topic="${esc(x.t)}">Øv</button></td></tr>`).join("");
+  const c = coach();
   $("#main").innerHTML = `
+  <div class="card status ${r.ready ? "ready" : "notyet"}"><div class="mut">Lærerens vurdering</div>
+    <h2 style="margin:4px 0 8px">${esc(c.head)}</h2>
+    ${c.lines.length ? `<ul>${c.lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}
+    <button class="btn" id="coachGo">${esc(c.action.label)}</button></div>
   <div class="grid">
     <div class="card"><div class="mut">Estimert karakter nå</div>
       <div class="row" style="margin:6px 0 0">${est.grade ? `<span class="grade">${est.grade}</span><span class="big">${est.pct} %</span>` : `<span class="mut">Svar på noen spørsmål først</span>`}</div>
@@ -141,13 +199,14 @@ function viewOverview() {
       <select id="target" style="max-width:180px">${GRADES.slice(0, 5).map(([g, t]) => `<option value="${g}" ${g === r.target ? "selected" : ""}>${g} (minst ${t} %)</option>`).join("")}</select>
       <p class="note">Prøveeksamener tatt: ${exams.length}${exams[0] ? ` · siste: ${exams[0].score}/${exams[0].total}` : ""}</p></div>
   </div>
-  <div class="card status ${statusCls}">${head}
+  <div class="card">${head}
     ${r.ready ? "" : `<ul>${r.checks.map(c => `<li>${c.ok ? "✅" : "⬜"} ${esc(c.text)}</li>`).join("")}</ul>`}
   </div>
   <h2>Per tema (siste ${RECENT} svar)</h2>
   <div class="card" style="overflow-x:auto"><table>${rows}</table></div>
   <p class="note">Hvordan det regnes ut: Hvert tema teller likt, slik at alle deler av pensum blir dekket. For hvert tema brukes de siste ${RECENT} svarene, så estimatet viser nivået ditt nå og ikke hvordan du lå an i starten. Gjennomsnittet gjøres om til karakter med NTNUs anbefalte prosentskala: A ≥ 89, B ≥ 77, C ≥ 65, D ≥ 53, E ≥ 41. Du er «klar» når alle temaene er godt nok øvd, estimatet ligger minst ${MARGIN} prosentpoeng over grensen og siste prøveeksamen også holder.</p>
   <div class="row"><button class="btn sec small" id="resetBtn">Nullstill all fremgang</button><span id="resetMsg" class="note"></span></div>`;
+  $("#coachGo").onclick = () => { if (c.action.topic) { show("tema"); runTopic(c.action.topic); } else show(c.action.view); };
   $("#target").onchange = async e => {
     profile.target_grade = e.target.value;
     await sb.from("profiles").upsert({ user_id: user.id, target_grade: profile.target_grade, updated_at: new Date().toISOString() });
@@ -169,19 +228,12 @@ function qHTML(q, k) {
   return `<div class="card q" id="q${k}"><div class="qh"><span>Spørsmål ${k + 1}</span><span class="tag">${esc(q.t)}</span></div>
   <div class="qt">${q.q}</div>
   ${order.map(i => `<label class="o" data-o="${i}"><input type="radio" name="r${k}" value="${i}"><span>${o[i]}</span></label>`).join("")}
-  <div class="ex"><b>Fasit:</b> ${o[q.a]}<br>${q.e}<div class="row" style="margin:8px 0 0"><button class="btn sec small" data-ask="${k}">Spør læreren om dette</button></div></div></div>`;
+  <div class="ex"><b>Fasit:</b> ${o[q.a]}<br>${q.e}</div></div>`;
 }
 function mark(d, q, v) {
   d.classList.add("done");
   d.querySelectorAll("label.o").forEach(l => { const i = +l.dataset.o; l.classList.toggle("ok", i === q.a); l.classList.toggle("bad", i === v && i !== q.a); });
   d.querySelectorAll("input").forEach(x => x.disabled = true);
-}
-function bindAsk(qs, chosen) {
-  $("#main").querySelectorAll("[data-ask]").forEach(b => b.onclick = () => {
-    const k = +b.dataset.ask, q = qs[k];
-    openTutor({ question: q.q, options: opts(q), correct: opts(q)[q.a], chosen: chosen[k] != null ? opts(q)[chosen[k]] : null, explanation: q.e, topic: q.t },
-      chosen[k] != null && chosen[k] !== q.a ? "Jeg svarte feil på dette. Kan du forklare hvorfor riktig svar er riktig, og hvordan jeg kan huske det?" : "Kan du forklare dette spørsmålet grundigere?");
-  });
 }
 
 // Øving med fasit med én gang (tema og svake punkter)
@@ -191,7 +243,8 @@ function runPractice(qs, mode, title, again) {
   let ok = 0, done = 0;
   host.innerHTML = `<div class="card sticky" id="score"></div>${qs.map(qHTML).join("")}
     <div class="row"><button class="btn sec" id="again">Nytt sett</button><button class="btn sec" id="toOverview">Se fremgangen min</button></div>`;
-  const sc = () => $("#score").innerHTML = `<b>${esc(title)}</b> · ${done} av ${qs.length} besvart · <b>${ok} riktige</b>${done ? ` (${Math.round(100 * ok / done)} %)` : ""}`;
+  const prev = estimate().topics.find(x => x.t === title)?.pct ?? null;
+  const sc = () => $("#score").innerHTML = `<b>${esc(title)}</b> · ${done} av ${qs.length} besvart · <b>${ok} riktige</b>${done ? ` (${Math.round(100 * ok / done)} %)` : ""}${done === qs.length ? `<div style="margin-top:6px"><b>Læreren:</b> ${esc(roundFeedback(title, ok, qs.length, prev))}</div>` : ""}`;
   sc();
   qs.forEach((q, k) => {
     const d = $("#q" + k);
@@ -200,7 +253,6 @@ function runPractice(qs, mode, title, again) {
       logAnswers([{ question_id: q.id, topic: q.t, correct: v === q.a, mode }]);
     });
   });
-  bindAsk(qs, chosen);
   $("#again").onclick = again;
   $("#toOverview").onclick = () => show("oversikt");
   host.scrollIntoView({ behavior: "smooth" });
@@ -208,13 +260,13 @@ function runPractice(qs, mode, title, again) {
 
 function viewTopics() {
   const est = estimate();
-  $("#main").innerHTML = `<p class="mut">Velg et tema. Du får 15 spørsmål om gangen, med fasit med én gang. Spørsmål du har svart feil på, eller ikke har sett før, kommer først.</p>
+  $("#main").innerHTML = `<p class="mut">Velg et tema. Du får 30 spørsmål om gangen, med fasit med én gang. Spørsmål du har svart feil på, eller ikke har sett før, kommer først.</p>
   <div class="row">${est.topics.map(x => `<button class="btn sec" data-t="${esc(x.t)}">${esc(x.t)} <span class="mut">${x.pct == null ? "" : "· " + x.pct + " %"}</span></button>`).join("")}</div><div id="practice"></div>`;
   $("#main").querySelectorAll("[data-t]").forEach(b => b.onclick = () => runTopic(b.dataset.t));
 }
 function runTopic(t) {
   $("#main").querySelectorAll("[data-t]").forEach(b => b.classList.toggle("on", b.dataset.t === t));
-  const qs = pickPrioritized(Q.filter(q => q.t === t), 15);
+  const qs = pickPrioritized(Q.filter(q => q.t === t), 30);
   runPractice(qs, "topic", t, () => runTopic(t));
 }
 
@@ -278,14 +330,14 @@ function startExam() {
       topic[q.t] = topic[q.t] || [0, 0]; topic[q.t][1]++; if (right) topic[q.t][0]++;
       rows.push({ question_id: q.id, topic: q.t, correct: right, mode: "exam" });
     });
-    bindAsk(qs, chosen);
-    await logAnswers(rows);
+      await logAnswers(rows);
     const { error } = await sb.from("exams").insert({ user_id: user.id, score: ok, total: qs.length });
     if (!error) exams.unshift({ score: ok, total: qs.length, created_at: new Date().toISOString() });
     const pct = Math.round(100 * ok / qs.length), g = gradeOf(pct), th = threshold(profile.target_grade);
     const trows = Object.entries(topic).sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).map(([t, [a, n]]) => `<tr><td>${esc(t)}</td><td>${a}/${n}</td></tr>`).join("");
     $("#result").innerHTML = `<div class="card"><div class="row" style="margin:0"><span class="grade">${g}</span><span class="big">${ok}/${qs.length} · ${pct} %</span></div>
       <p>${pct >= th ? `Over grensen for målet ditt (${profile.target_grade}, ${th} %).` : `Under grensen for målet ditt (${profile.target_grade}, ${th} %), så du mangler ${th - pct} prosentpoeng.`} Fasit og forklaringer står ved hvert spørsmål ovenfor.</p>
+      <p><b>Læreren:</b> ${esc(coach().head)} ${esc(coach().lines[0] || "")}</p>
       <table>${trows}</table>
       <div class="row"><button class="btn" id="toOv">Se fremgangen min</button><button class="btn sec" id="newExam">Ny prøveeksamen</button></div></div>`;
     $("#toOv").onclick = () => show("oversikt");
@@ -294,45 +346,3 @@ function startExam() {
   };
 }
 
-// ---------- læreren ----------
-$("#tutorFab").onclick = () => openTutor(null, "");
-$("#tutorClose").onclick = () => { $("#tutorPanel").classList.add("hidden"); $("#tutorFab").classList.remove("hidden"); };
-function openTutor(ctx, prefill) {
-  if (ctx) { tutorCtx = ctx; tutorMsgs = []; }
-  $("#tutorPanel").classList.remove("hidden"); $("#tutorFab").classList.add("hidden");
-  if (!tutorMsgs.length) renderTutor(ctx ? `Spørsmål: «${ctx.question.replace(/<[^>]+>/g, "")}»\nSpør meg om hva du vil rundt dette.` : "Hei! Jeg er læreren din i TGB4100. Spør meg om hva som helst i pensum, eller be meg forhøre deg om et tema.");
-  else renderTutor();
-  $("#tutorInput").value = prefill || "";
-  $("#tutorInput").focus();
-}
-function renderTutor(intro) {
-  const log = $("#tutorLog");
-  log.innerHTML = (intro ? `<div class="msg a">${esc(intro)}</div>` : (log.dataset.intro || "")) +
-    tutorMsgs.map(m => `<div class="msg ${m.role === "user" ? "u" : "a"}">${esc(m.content)}</div>`).join("");
-  if (intro) log.dataset.intro = `<div class="msg a">${esc(intro)}</div>`;
-  log.scrollTop = log.scrollHeight;
-}
-$("#tutorInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#tutorForm").requestSubmit(); } });
-$("#tutorForm").onsubmit = async e => {
-  e.preventDefault();
-  const text = $("#tutorInput").value.trim(); if (!text) return;
-  $("#tutorInput").value = "";
-  tutorMsgs.push({ role: "user", content: text }); renderTutor();
-  const log = $("#tutorLog"); log.insertAdjacentHTML("beforeend", `<div class="msg a" id="typing">Tenker …</div>`); log.scrollTop = log.scrollHeight;
-  const est = estimate();
-  const weak = est.topics.filter(x => x.pct != null).sort((a, b) => a.pct - b.pct).slice(0, 3).map(x => `${x.t} (${x.pct} %)`);
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    const res = await fetch("/api/tutor", {
-      method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token },
-      body: JSON.stringify({ messages: tutorMsgs.slice(-12), context: tutorCtx, progress: { estimate: est.pct, grade: est.grade, target: profile.target_grade, weakest: weak } })
-    });
-    const j = await res.json();
-    $("#typing")?.remove();
-    tutorMsgs.push({ role: "assistant", content: res.ok ? j.reply + (j.remaining != null && j.remaining <= 5 ? `\n\n(${j.remaining} spørsmål igjen til læreren i dag)` : "") : (j.error || "Noe gikk galt.") });
-  } catch (err) {
-    $("#typing")?.remove();
-    tutorMsgs.push({ role: "assistant", content: "Fikk ikke kontakt med læreren. Prøv igjen om litt." });
-  }
-  renderTutor();
-};

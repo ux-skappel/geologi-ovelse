@@ -4,9 +4,9 @@
 
 - **416 spørsmål** fordelt på 12 temaer (minst 31 per tema), med fasit og forklaring
 - **Prøveeksamen**: 50 spørsmål trukket fra alle temaene, med fasit først når du leverer
-- **Øv på tema** og **Øv på svake punkter**: fasit med én gang. Spørsmål du har svart feil på kommer først
+- **Øv på tema** (30 spørsmål per runde) og **Øv på svake punkter**: fasit med én gang. Spørsmål du har svart feil på kommer først, og utvalget varierer fra gang til gang
 - **Min fremgang**: karakterestimat etter NTNUs prosentskala (A ≥ 89, B ≥ 77, C ≥ 65, D ≥ 53, E ≥ 41) og beskjed når du er klar for karakteren du sikter mot
-- **Læreren**: en AI-lærer (Claude) som forklarer, forhører og kjenner pensum og fremgangen din
+- **Lærerens vurdering**: en automatisk lærer (regelbasert, ingen AI-kostnad) som forteller hvordan du ligger an, hva som er svakest, om du er i fremgang og hva du bør gjøre nå
 - Innlogging og lagring med **Supabase**, hosting med **Vercel**
 
 ## Oppsett
@@ -27,9 +27,6 @@
 |---|---|
 | `SUPABASE_URL` | Project URL fra Supabase |
 | `SUPABASE_ANON_KEY` | anon public key fra Supabase |
-| `ANTHROPIC_API_KEY` | API-nøkkel fra console.anthropic.com |
-| `ANTHROPIC_MODEL` | (valgfritt) standard er `claude-haiku-5-5`, som er billigst. `claude-sonnet-5-5` gir bedre forklaringer |
-| `TUTOR_DAILY_LIMIT` | (valgfritt) antall spørsmål til læreren per bruker per døgn, standard 40 |
 
 4. Trykk **Deploy**.
 
@@ -45,7 +42,6 @@
 ```
 public/        nettsiden (index.html, app.js, style.css, questions.js, cheat.js)
 api/config.js  gir nettleseren Supabase-URL og anon-nøkkel
-api/tutor.js   læreren (kaller Anthropic API på serveren, sjekker innlogging og dagsgrense)
 supabase/      databaseskjema med RLS (hver bruker ser bare sine egne data)
 bank/          kildefilene til spørsmålene. Kjør `node bank/build.js` for å bygge public/questions.js
 ```
