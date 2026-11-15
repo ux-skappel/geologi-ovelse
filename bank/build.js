@@ -1,0 +1,10 @@
+const fs=require('fs'),crypto=require('crypto');
+let all=JSON.parse(fs.readFileSync(__dirname+'/00_eksisterende.json'));
+for(const f of ['01_kart_fossiler','02_tid_vulkaner','03_plate_landskap','04_resten']) all=all.concat(require('./'+f));
+all=all.map(q=>{let t=q[0];if(t==='Bergarter')t=q[1].startsWith('Metamorfe')?'Metamorfe bergarter':'Magmatiske bergarter';
+ const opts=q[2]==='TF'?'TF':q[2];
+ if(opts!=='TF'&&(q[3]>=opts.length||opts.length<2))throw Error('bad '+q[1]);
+ return {id:crypto.createHash('sha1').update(q[1]).digest('hex').slice(0,10),t,q:q[1],o:opts,a:q[3],e:q[4]};});
+const ids=new Set();all.forEach(q=>{if(ids.has(q.id))console.log('DUP',q.q);ids.add(q.id)});
+const c={};all.forEach(q=>c[q.t]=(c[q.t]||0)+1);console.log(c,all.length);
+fs.writeFileSync(__dirname+'/../public/questions.js','window.QUESTIONS='+JSON.stringify(all)+';');

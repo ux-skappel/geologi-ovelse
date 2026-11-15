@@ -1,0 +1,7 @@
+{
+  "name": "geologi-ovelse",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Øvingsapp for TGB4100 Geologi, innføring (NTNU)",
+  "engines": { "node": ">=18" }
+}

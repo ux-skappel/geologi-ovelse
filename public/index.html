@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TGB4100 Geologi – øving</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="in">
+    <div class="brand">TGB4100 <span>Geologi-øving</span></div>
+    <div id="who" class="who"></div>
+  </div>
+</header>
+
+<section id="auth" class="wrap hidden">
+  <div class="card narrow">
+    <h1>Logg inn</h1>
+    <p class="mut">Øv til eksamen i TGB4100 Geologi, innføring. Fremgangen din lagres, du får et karakterestimat etter NTNU-skalaen og beskjed når du er klar for karakteren du sikter mot.</p>
+    <form id="authForm">
+      <label>E-post<input type="email" id="email" required autocomplete="email"></label>
+      <label>Passord<input type="password" id="password" required minlength="6" autocomplete="current-password"></label>
+      <div class="row">
+        <button class="btn" type="submit" id="loginBtn">Logg inn</button>
+        <button class="btn sec" type="button" id="signupBtn">Lag konto</button>
+      </div>
+      <p id="authMsg" class="mut"></p>
+    </form>
+  </div>
+</section>
+
+<nav id="nav" class="hidden"><div class="in" id="tabs"></div></nav>
+<main id="main" class="wrap hidden"></main>
+
+<div id="tutorPanel" class="tutor hidden">
+  <div class="tutorHead"><b>Læreren</b><button class="x" id="tutorClose" aria-label="Lukk">×</button></div>
+  <div id="tutorLog" class="tutorLog"></div>
+  <form id="tutorForm" class="tutorForm">
+    <textarea id="tutorInput" rows="2" placeholder="Spør om hva som helst i pensum …"></textarea>
+    <button class="btn" type="submit">Send</button>
+  </form>
+</div>
+<button id="tutorFab" class="fab hidden">Spør læreren</button>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/questions.js"></script>
+<script src="/cheat.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
