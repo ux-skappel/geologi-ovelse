@@ -44,3 +44,6 @@ returns void language sql security definer set search_path = public as $$
 $$;
 revoke all on function public.reset_progress(text) from public;
 grant execute on function public.reset_progress(text) to anon;
+
+-- Eksamenstype (tilfeldig prøveeksamen eller ekte eksamen 2024/2025)
+alter table public.exams add column if not exists kind text not null default 'random' check (kind in ('random','real2024','real2025'));

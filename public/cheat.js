@@ -41,5 +41,16 @@ window.CHEAT=`
 <li><b>Hendelser:</b> Big Bang 13,8 Ga · Jorda 4,54 Ga · første liv ~3,8 Ga · oksygen (GOE) ~2,4 Ga · Snowball Earth ~700 Ma · kambrisk eksplosjon ~539 Ma · landplanter fra silur · første fugler i jura · Kaledonidene ~400 Ma · Oslo-riften ~300 Ma (perm) · Pangea i perm · Atlanterhavet åpnes ~200 Ma (jura) · Alpene ~50–30 Ma</li>
 <li><b>Relativ datering:</b> uniformitarisme, opprinnelig horisontalitet, superposisjon, lateral kontinuitet, gjennomskjæring, inneslutninger, faunasuksesjon</li>
 </ul></div>
+<h2>Fra eksamen 2024 og 2025 (gikk igjen)</h2>
+<div class="q"><ul>
+<li><b>Mohs:</b> talk 1 · gips 2 · kalsitt 3 · fluoritt 4 · apatitt 5 · ortoklas 6 · kvarts 7 · topas 8 · korund 9 · diamant 10 (lommekniv ≈ 5,5)</li>
+<li><b>Grensealdre:</b> devon 419,2–358,9 Ma · perm–trias 252 Ma · kritt–paleogen (K–Pg) 66 Ma · kambrium starter 538,8 Ma</li>
+<li><b>Jordskjelv:</b> hyposenter (fokus) = der bruddet starter i dypet; episenter = punktet på overflaten rett over · minst 3 seismografer for å finne episenteret</li>
+<li><b>P- og S-bølger:</b> P = trykkbølge, raskest, går gjennom fast stoff, væske og gass · S = skjærbølge, bare gjennom fast stoff, og gir skyggesone bak den flytende ytre kjernen</li>
+<li><b>Moho</b> = grensen mellom skorpe og mantel · seismiske bølger har avslørt jordas indre oppbygging</li>
+<li><b>Wegener:</b> foreslo kontinentaldrift, men manglet en mekanisme · drivkraft i dag: mantelkonveksjon + slab pull</li>
+<li><b>Vann:</b> akvifer = mettet, porøst og permeabelt lag · grunnvannsspeil = grensen mellom umettet og mettet sone · porøsitet = andel åpent rom · overpumping gir synkende grunnvann og setninger</li>
+<li><b>Flervalgsfeller:</b> C-14 brukes ikke på bergarter (bare ungt organisk materiale) · transformgrenser gir lite magma · en konformitet er ikke en diskordans</li>
+</ul></div>
 <p class="note">Mesozoiske etasjer (Indus … Maastricht) ble spurt om på eldre eksamener (Krill). Ny foreleser sier «2–3 spørsmål om stratigrafisk kart: eoner, æraer, perioder og grensealdre». Prioriter periodene og grensealdrene.</p>
 `;

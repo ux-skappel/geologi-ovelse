@@ -70,7 +70,7 @@ $("#authForm").onsubmit = async e => {
 async function loadData() {
   const [a, ex, p] = await Promise.all([
     sb.from("answers").select("question_id,topic,correct,created_at").eq("username", user.name).order("created_at", { ascending: false }).limit(10000),
-    sb.from("exams").select("score,total,created_at").eq("username", user.name).order("created_at", { ascending: false }).limit(50),
+    sb.from("exams").select("score,total,kind,created_at").eq("username", user.name).order("created_at", { ascending: false }).limit(50),
     sb.from("players").select("target_grade").eq("username", user.name).maybeSingle()
   ]);
   answers = a.data || [];
@@ -165,14 +165,14 @@ function roundFeedback(title, ok, n, prevPct) {
 }
 
 // ---------- navigasjon ----------
-const VIEWS = [["oversikt", "Min fremgang"], ["eksamen", "Prøveeksamen"], ["tema", "Øv på tema"], ["svake", "Øv på svake punkter"], ["huskeliste", "Huskeliste"]];
+const VIEWS = [["oversikt", "Min fremgang"], ["eksamen", "Prøveeksamen"], ["ekte", "Ekte eksamener"], ["tema", "Øv på tema"], ["svake", "Øv på svake punkter"], ["huskeliste", "Huskeliste"]];
 function renderTabs() {
   $("#tabs").innerHTML = VIEWS.map(([k, n]) => `<button data-v="${k}" class="${k === view ? "on" : ""}">${n}</button>`).join("");
   $("#tabs").querySelectorAll("button").forEach(b => b.onclick = () => show(b.dataset.v));
 }
 function show(v) {
   view = v; renderTabs(); window.scrollTo(0, 0);
-  ({ oversikt: viewOverview, eksamen: viewExamIntro, tema: viewTopics, svake: viewWeak, huskeliste: () => $("#main").innerHTML = `<div class="cheat">${window.CHEAT}</div>` })[v]();
+  ({ oversikt: viewOverview, eksamen: viewExamIntro, ekte: viewReal, tema: viewTopics, svake: viewWeak, huskeliste: () => $("#main").innerHTML = `<div class="cheat">${window.CHEAT}</div>` })[v]();
 }
 
 // ---------- oversikt ----------
@@ -225,17 +225,25 @@ function viewOverview() {
 }
 
 // ---------- spørsmål ----------
-function qHTML(q, k) {
-  const o = opts(q), order = q.o === "TF" ? [0, 1] : shuffle([...o.keys()]);
-  return `<div class="card q" id="q${k}"><div class="qh"><span>Spørsmål ${k + 1}</span><span class="tag">${esc(q.t)}</span></div>
+const isMulti = q => Array.isArray(q.a);
+const isRight = (q, v) => isMulti(q) ? Array.isArray(v) && v.length === q.a.length && q.a.every(i => v.includes(i)) : v === q.a;
+const answerText = q => isMulti(q) ? q.a.map(i => opts(q)[i]).join("; ") : opts(q)[q.a];
+function qHTML(q, k, practice = false, fixed = false) {
+  const o = opts(q), order = q.o === "TF" || fixed ? [...o.keys()] : shuffle([...o.keys()]);
+  const multi = isMulti(q);
+  return `<div class="card q" id="q${k}"><div class="qh"><span>Spørsmål ${k + 1}${q.src ? ` · <span class="mut">${esc(q.src)}</span>` : ""}</span><span class="tag">${esc(q.t)}</span></div>
   <div class="qt">${q.q}</div>
-  ${order.map(i => `<label class="o" data-o="${i}"><input type="radio" name="r${k}" value="${i}"><span>${o[i]}</span></label>`).join("")}
-  <div class="ex"><b>Fasit:</b> ${o[q.a]}<br>${q.e}</div></div>`;
+  ${multi ? `<p class="note" style="margin:2px 0 6px">Velg alle som er riktige.</p>` : ""}
+  ${order.map(i => `<label class="o" data-o="${i}"><input type="${multi ? "checkbox" : "radio"}" name="${multi ? "c" : "r"}${k}" value="${i}"><span>${o[i]}</span></label>`).join("")}
+  ${multi && practice ? `<button class="btn sec small check" data-k="${k}">Sjekk svar</button>` : ""}
+  <div class="ex"><b>Fasit:</b> ${answerText(q)}<br>${q.e}</div></div>`;
 }
+function readMulti(d) { return [...d.querySelectorAll("input:checked")].map(x => +x.value).sort((a, b) => a - b); }
 function mark(d, q, v) {
   d.classList.add("done");
-  d.querySelectorAll("label.o").forEach(l => { const i = +l.dataset.o; l.classList.toggle("ok", i === q.a); l.classList.toggle("bad", i === v && i !== q.a); });
-  d.querySelectorAll("input").forEach(x => x.disabled = true);
+  const right = isMulti(q) ? q.a : [q.a], picked = v == null ? [] : Array.isArray(v) ? v : [v];
+  d.querySelectorAll("label.o").forEach(l => { const i = +l.dataset.o; l.classList.toggle("ok", right.includes(i)); l.classList.toggle("bad", picked.includes(i) && !right.includes(i)); });
+  d.querySelectorAll("input, button.check").forEach(x => x.disabled = true);
 }
 
 // Øving med fasit med én gang (tema og svake punkter)
@@ -243,17 +251,20 @@ function runPractice(qs, mode, title, again) {
   const host = $("#practice");
   const chosen = {};
   let ok = 0, done = 0;
-  host.innerHTML = `<div class="card sticky" id="score"></div>${qs.map(qHTML).join("")}
+  host.innerHTML = `<div class="card sticky" id="score"></div>${qs.map((q, k) => qHTML(q, k, true)).join("")}
     <div class="row"><button class="btn sec" id="again">Nytt sett</button><button class="btn sec" id="toOverview">Se fremgangen min</button></div>`;
   const prev = estimate().topics.find(x => x.t === title)?.pct ?? null;
   const sc = () => $("#score").innerHTML = `<b>${esc(title)}</b> · ${done} av ${qs.length} besvart · <b>${ok} riktige</b>${done ? ` (${Math.round(100 * ok / done)} %)` : ""}${done === qs.length ? `<div style="margin-top:6px"><b>Læreren:</b> ${esc(roundFeedback(title, ok, qs.length, prev))}</div>` : ""}`;
   sc();
   qs.forEach((q, k) => {
     const d = $("#q" + k);
-    d.addEventListener("change", e => {
-      const v = +e.target.value; chosen[k] = v; mark(d, q, v); done++; if (v === q.a) ok++; sc();
-      logAnswers([{ question_id: q.id, topic: q.t, correct: v === q.a, mode }]);
-    });
+    const answer = v => {
+      if (k in chosen) return;
+      chosen[k] = v; mark(d, q, v); done++; const r = isRight(q, v); if (r) ok++; sc();
+      logAnswers([{ question_id: q.id, topic: q.t, correct: r, mode }]);
+    };
+    if (isMulti(q)) d.querySelector("button.check").onclick = () => answer(readMulti(d));
+    else d.addEventListener("change", e => answer(+e.target.value));
   });
   $("#again").onclick = again;
   $("#toOverview").onclick = () => show("oversikt");
@@ -301,7 +312,7 @@ function viewWeak() {
 // ---------- prøveeksamen ----------
 function viewExamIntro() {
   $("#main").innerHTML = `<div class="card"><h1>Prøveeksamen</h1>
-  <p>${EXAM_LEN} spørsmål trekkes fra alle ${TOPICS.length} temaene (ca. 4 per tema), i samme format som eksempelspørsmålene fra 2024: flervalg og sant/usant. Du får fasit først når du leverer. Resultatet teller i vurderingen av om du er klar.</p>
+  <p>${EXAM_LEN} spørsmål trekkes tilfeldig fra alle ${TOPICS.length} temaene (ca. 4 per tema), blant annet fra eksamenene i 2024 og 2025. Formatet er flervalg og sant/usant. Du får fasit først når du leverer. Resultatet teller i vurderingen av om du er klar.</p>
   <p class="mut">Sett av ca. 60 minutter. Ingen hjelpemidler.</p>
   <button class="btn" id="startExam">Start prøveeksamen</button></div>`;
   $("#startExam").onclick = startExam;
@@ -311,40 +322,61 @@ function startExam() {
   let picked = [];
   TOPICS.forEach(t => picked.push(...shuffle(Q.filter(q => q.t === t)).slice(0, per)));
   const rest = shuffle(Q.filter(q => !picked.includes(q))).slice(0, EXAM_LEN - picked.length);
-  const qs = shuffle(picked.concat(rest));
-  const chosen = {};
-  $("#main").innerHTML = `<div id="examBox"><div class="card sticky" id="score">0 av ${qs.length} besvart</div>${qs.map(qHTML).join("")}
+  runExam(shuffle(picked.concat(rest)), "random", false, startExam);
+}
+function runExam(qs, kind, fixed, again) {
+  window.scrollTo(0, 0);
+  $("#main").innerHTML = `<div id="examBox"><div class="card sticky" id="score">0 av ${qs.length} besvart</div>${qs.map((q, k) => qHTML(q, k, false, fixed)).join("")}
   <div class="row"><button class="btn" id="submit">Lever og se resultat</button><span id="warn" class="note"></span></div><div id="result"></div></div>`;
-  $("#examBox").addEventListener("change", e => {
-    const m = e.target.name?.match(/^r(\d+)$/); if (!m) return;
-    chosen[+m[1]] = +e.target.value;
-    $("#score").textContent = `${Object.keys(chosen).length} av ${qs.length} besvart`;
-  });
+  const val = k => { const d = $("#q" + k); if (isMulti(qs[k])) { const v = readMulti(d); return v.length ? v : undefined; } const c = d.querySelector("input:checked"); return c ? +c.value : undefined; };
+  const count = () => qs.filter((q, k) => val(k) !== undefined).length;
+  $("#examBox").addEventListener("change", () => { $("#score").textContent = `${count()} av ${qs.length} besvart`; });
   let armed = false;
   $("#submit").onclick = async () => {
-    const missing = qs.length - Object.keys(chosen).length;
+    const missing = qs.length - count();
     if (missing && !armed) { armed = true; $("#warn").textContent = `Du har ${missing} ubesvarte. Trykk igjen for å levere likevel (ubesvart teller som feil).`; return; }
     $("#submit").disabled = true;
     let ok = 0; const topic = {}, rows = [];
     qs.forEach((q, k) => {
-      const v = chosen[k], right = v === q.a;
+      const v = val(k), right = isRight(q, v);
       mark($("#q" + k), q, v); if (right) ok++;
       topic[q.t] = topic[q.t] || [0, 0]; topic[q.t][1]++; if (right) topic[q.t][0]++;
       rows.push({ question_id: q.id, topic: q.t, correct: right, mode: "exam" });
     });
-      await logAnswers(rows);
-    const { error } = await sb.from("exams").insert({ username: user.name, score: ok, total: qs.length });
-    if (!error) exams.unshift({ score: ok, total: qs.length, created_at: new Date().toISOString() });
+    await logAnswers(rows);
+    const { error } = await sb.from("exams").insert({ username: user.name, score: ok, total: qs.length, kind });
+    if (error) console.error(error); else exams.unshift({ score: ok, total: qs.length, kind, created_at: new Date().toISOString() });
     const pct = Math.round(100 * ok / qs.length), g = gradeOf(pct), th = threshold(profile.target_grade);
     const trows = Object.entries(topic).sort((a, b) => a[1][0] / a[1][1] - b[1][0] / b[1][1]).map(([t, [a, n]]) => `<tr><td>${esc(t)}</td><td>${a}/${n}</td></tr>`).join("");
+    const c = coach();
     $("#result").innerHTML = `<div class="card"><div class="row" style="margin:0"><span class="grade">${g}</span><span class="big">${ok}/${qs.length} · ${pct} %</span></div>
       <p>${pct >= th ? `Over grensen for målet ditt (${profile.target_grade}, ${th} %).` : `Under grensen for målet ditt (${profile.target_grade}, ${th} %), så du mangler ${th - pct} prosentpoeng.`} Fasit og forklaringer står ved hvert spørsmål ovenfor.</p>
-      <p><b>Læreren:</b> ${esc(coach().head)} ${esc(coach().lines[0] || "")}</p>
+      <p><b>Læreren:</b> ${esc(c.head)} ${esc(c.lines[0] || "")}</p>
       <table>${trows}</table>
-      <div class="row"><button class="btn" id="toOv">Se fremgangen min</button><button class="btn sec" id="newExam">Ny prøveeksamen</button></div></div>`;
+      <div class="row"><button class="btn" id="toOv">Se fremgangen min</button><button class="btn sec" id="newExam">${kind === "random" ? "Ny prøveeksamen" : "Ta den på nytt"}</button></div></div>`;
     $("#toOv").onclick = () => show("oversikt");
-    $("#newExam").onclick = startExam;
+    $("#newExam").onclick = again;
     $("#result").scrollIntoView({ behavior: "smooth" });
   };
 }
 
+// ---------- ekte eksamener (2024 og 2025) ----------
+const REAL = window.REAL_EXAMS || {};
+const REAL_INFO = { "2024": "Eksamen 30.11.2024", "2025": "Eksamen 27.11.2025" };
+function viewReal() {
+  const cards = Object.keys(REAL).sort().reverse().map(y => {
+    const runs = exams.filter(e => e.kind === "real" + y);
+    const best = runs.length ? Math.max(...runs.map(e => Math.round(100 * e.score / e.total))) : null;
+    return `<div class="card"><h2 style="margin-top:0">${REAL_INFO[y] || "Eksamen " + y}</h2>
+      <p>${REAL[y].length} spørsmål i samme rekkefølge som på eksamen. Du får fasit når du leverer.</p>
+      <p class="mut">${runs.length ? `Tatt ${runs.length} gang${runs.length > 1 ? "er" : ""} · siste ${runs[0].score}/${runs[0].total} · beste ${best} % (${gradeOf(best)})` : "Ikke tatt ennå"}</p>
+      <button class="btn" data-y="${y}">Start eksamen ${y}</button></div>`;
+  }).join("");
+  $("#main").innerHTML = `<p class="mut">Dette er de to siste ordinære eksamenene i emnet, med samme foreleser. Spørsmål som bare kan besvares med et bilde (kart, figurer, steinprøver) er tatt ut, fordi bildene ikke er med. Utfyllings- og sorteringsoppgaver er gjort om til flervalg. Fasiten er laget ut fra pensum; den er ikke den offisielle.</p>
+  <p class="note">Spørsmålene finnes også i temaøvingen og i de tilfeldige prøveeksamenene, merket med eksamensår og oppgavenummer.</p>
+  <div class="grid">${cards}</div>`;
+  $("#main").querySelectorAll("[data-y]").forEach(b => b.onclick = () => startReal(b.dataset.y));
+}
+function startReal(y) {
+  runExam(REAL[y].map(id => QBYID[id]), "real" + y, true, () => startReal(y));
+}
