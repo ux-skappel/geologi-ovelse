@@ -1,0 +1,567 @@
+{
+"items": [
+{
+"f": "b/trilobitt-1.jpg",
+"n": "Trilobitt",
+"k": "Fossiler"
+},
+{
+"f": "b/ammonitt-1.jpg",
+"n": "Ammonitt",
+"k": "Fossiler"
+},
+{
+"f": "b/brachiopode-1.jpg",
+"n": "Brachiopode",
+"k": "Fossiler"
+},
+{
+"f": "b/graptolitt-1.jpg",
+"n": "Graptolitt",
+"k": "Fossiler"
+},
+{
+"f": "b/graptolitt-2.jpg",
+"n": "Graptolitt",
+"k": "Fossiler"
+},
+{
+"f": "b/foraminiferer-1.jpg",
+"n": "Foraminiferer",
+"k": "Fossiler"
+},
+{
+"f": "b/nummulitt-1.jpg",
+"n": "Nummulitt",
+"k": "Fossiler"
+},
+{
+"f": "b/nummulitt-2.jpg",
+"n": "Nummulitt",
+"k": "Fossiler"
+},
+{
+"f": "b/belemnitt-1.jpg",
+"n": "Belemnitt",
+"k": "Fossiler"
+},
+{
+"f": "b/fiskefossil-1.jpg",
+"n": "Fiskefossil",
+"k": "Fossiler"
+},
+{
+"f": "b/fiskefossil-2.jpg",
+"n": "Fiskefossil",
+"k": "Fossiler"
+},
+{
+"f": "b/snegl-1.jpg",
+"n": "Snegl",
+"k": "Fossiler"
+},
+{
+"f": "b/echinoid-krakebolle-1.jpg",
+"n": "Echinoid (kråkebolle)",
+"k": "Fossiler"
+},
+{
+"f": "b/plantefossil-1.jpg",
+"n": "Plantefossil",
+"k": "Fossiler"
+},
+{
+"f": "b/plantefossil-2.jpg",
+"n": "Plantefossil",
+"k": "Fossiler"
+},
+{
+"f": "b/hornkorall-1.jpg",
+"n": "Hornkorall",
+"k": "Fossiler"
+},
+{
+"f": "b/bikakekorall-1.jpg",
+"n": "Bikakekorall",
+"k": "Fossiler"
+},
+{
+"f": "b/bikakekorall-2.jpg",
+"n": "Bikakekorall",
+"k": "Fossiler"
+},
+{
+"f": "b/crinoid-sjolilje-1.jpg",
+"n": "Crinoid (sjølilje)",
+"k": "Fossiler"
+},
+{
+"f": "b/crinoid-sjolilje-2.jpg",
+"n": "Crinoid (sjølilje)",
+"k": "Fossiler"
+},
+{
+"f": "b/bryozo-mosdyr-1.jpg",
+"n": "Bryozo (mosdyr)",
+"k": "Fossiler"
+},
+{
+"f": "b/bryozo-mosdyr-2.jpg",
+"n": "Bryozo (mosdyr)",
+"k": "Fossiler"
+},
+{
+"f": "b/musling-1.jpg",
+"n": "Musling",
+"k": "Fossiler"
+},
+{
+"f": "b/dinosaurben-1.jpg",
+"n": "Dinosaurben",
+"k": "Fossiler"
+},
+{
+"f": "b/konodont-1.jpg",
+"n": "Konodont",
+"k": "Fossiler"
+},
+{
+"f": "b/granitt-1.jpg",
+"n": "Granitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/granitt-2.jpg",
+"n": "Granitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/granitt-3.jpg",
+"n": "Granitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/rhyolitt-1.jpg",
+"n": "Rhyolitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/dioritt-1.jpg",
+"n": "Dioritt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/dioritt-2.jpg",
+"n": "Dioritt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/andesitt-1.jpg",
+"n": "Andesitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/gabbro-1.jpg",
+"n": "Gabbro",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/basalt-1.jpg",
+"n": "Basalt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/basalt-2.jpg",
+"n": "Basalt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/peridotitt-1.jpg",
+"n": "Peridotitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/peridotitt-2.jpg",
+"n": "Peridotitt",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/porfyr-porfyrisk-tekstur-1.jpg",
+"n": "Porfyr (porfyrisk tekstur)",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/porfyr-porfyrisk-tekstur-2.jpg",
+"n": "Porfyr (porfyrisk tekstur)",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/obsidian-1.jpg",
+"n": "Obsidian",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/obsidian-2.jpg",
+"n": "Obsidian",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/obsidian-3.jpg",
+"n": "Obsidian",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/pimpstein-1.jpg",
+"n": "Pimpstein",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/scoria-slagg-1.jpg",
+"n": "Scoria (slagg)",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/tuff-1.jpg",
+"n": "Tuff",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/putelava-1.jpg",
+"n": "Putelava",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/putelava-2.jpg",
+"n": "Putelava",
+"k": "Magmatiske bergarter"
+},
+{
+"f": "b/sandstein-1.jpg",
+"n": "Sandstein",
+"k": "Sedimentære bergarter"
+},
+{
+"f": "b/kvartssandstein-1.jpg",
+"n": "Kvartssandstein",
+"k": "Sedimentære bergarter"
+},
+{
+"f": "b/konglomerat-1.jpg",
+"n": "Konglomerat",
+"k": "Sedimentære bergarter"
+},
+{
+"f": "b/kalkstein-1.jpg",
+"n": "Kalkstein",
+"k": "Sedimentære bergarter"
+},
+{
+"f": "b/kull-1.jpg",
+"n": "Kull",
+"k": "Sedimentære bergarter"
+},
+{
+"f": "b/leirskifer-slate-1.jpg",
+"n": "Leirskifer (slate)",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/leirskifer-slate-2.jpg",
+"n": "Leirskifer (slate)",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/fyllitt-1.jpg",
+"n": "Fyllitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/fyllitt-2.jpg",
+"n": "Fyllitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/metakonglomerat-1.jpg",
+"n": "Metakonglomerat",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/glimmerskifer-1.jpg",
+"n": "Glimmerskifer",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/glimmerskifer-2.jpg",
+"n": "Glimmerskifer",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/glimmerskifer-3.jpg",
+"n": "Glimmerskifer",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/glimmerskifer-4.jpg",
+"n": "Glimmerskifer",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/granatglimmerskifer-1.jpg",
+"n": "Granatglimmerskifer",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/granatglimmerskifer-2.jpg",
+"n": "Granatglimmerskifer",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/gneis-1.jpg",
+"n": "Gneis",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/gneis-2.jpg",
+"n": "Gneis",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/migmatitt-1.jpg",
+"n": "Migmatitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/migmatitt-2.jpg",
+"n": "Migmatitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/migmatitt-3.jpg",
+"n": "Migmatitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/mylonitt-1.jpg",
+"n": "Mylonitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/kvartsitt-1.jpg",
+"n": "Kvartsitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/marmor-1.jpg",
+"n": "Marmor",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/hornfels-1.jpg",
+"n": "Hornfels",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/amfibolitt-1.jpg",
+"n": "Amfibolitt",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/gronnskifer-gronnstein-1.jpg",
+"n": "Grønnskifer / grønnstein",
+"k": "Metamorfe bergarter"
+},
+{
+"f": "b/kvarts-1.jpg",
+"n": "Kvarts",
+"k": "Mineraler"
+},
+{
+"f": "b/hornblende-1.jpg",
+"n": "Hornblende",
+"k": "Mineraler"
+},
+{
+"f": "b/feltspat-1.jpg",
+"n": "Feltspat",
+"k": "Mineraler"
+},
+{
+"f": "b/kloritt-1.jpg",
+"n": "Kloritt",
+"k": "Mineraler"
+},
+{
+"f": "b/tegning-trilobitt.jpg",
+"n": "Trilobitt",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-graptolitt.jpg",
+"n": "Graptolitt",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-hornkorall.jpg",
+"n": "Hornkorall",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-bikakekorall.jpg",
+"n": "Bikakekorall",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-ammonitt.jpg",
+"n": "Ammonitt",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-ortoceras.jpg",
+"n": "Ortoceras",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-belemnitt.jpg",
+"n": "Belemnitt",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-brachiopode.jpg",
+"n": "Brachiopode",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-musling.jpg",
+"n": "Musling",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-snegl.jpg",
+"n": "Snegl",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-echinoid-krakebolle.jpg",
+"n": "Echinoid (kråkebolle)",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-crinoid-sjolilje.jpg",
+"n": "Crinoid (sjølilje)",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-haitann.jpg",
+"n": "Haitann",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-nummulitt.jpg",
+"n": "Nummulitt",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-konodont.jpg",
+"n": "Konodont",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "b/tegning-kokkolitt.jpg",
+"n": "Kokkolitt",
+"k": "Fossiler",
+"src": "Eksamen 2021 oppg. 5 (tegning)"
+},
+{
+"f": "e/e2025_99.jpg",
+"n": "Breksje",
+"k": "Sedimentære bergarter",
+"src": "Eksamen 2025 oppg. 99"
+},
+{
+"f": "e/e2025_97.jpg",
+"n": "Gabbro",
+"k": "Magmatiske bergarter",
+"src": "Eksamen 2025 oppg. 97"
+},
+{
+"f": "e/e2025_98.jpg",
+"n": "Putelava",
+"k": "Magmatiske bergarter",
+"src": "Eksamen 2025 oppg. 98"
+}
+],
+"info": {
+"Trilobitt": "Havdyr med tre kroppsdeler (tre «lober»). Mest i kambrium–silur, utdødd ved slutten av paleozoikum.",
+"Graptolitt": "Kolonidyr som drev fritt i havet, sagtannet utseende. Mest i ordovicium, utdødd ved slutten av paleozoikum. Gode ledefossiler.",
+"Ammonitt": "Spiralformet blekksprut med kamre. Utdødd ved slutten av mesozoikum (K–Pg, 66 Ma).",
+"Belemnitt": "Blekksprut med indre, kuleformet «haleballast» (rostrum), som er det som oftest blir bevart. Utdødd ved slutten av mesozoikum.",
+"Ortoceras": "Rett (ikke spiralformet) blekksprut med kamre. Utdødd ved slutten av paleozoikum. Vanlig i ordovicisk kalkstein i Oslofeltet.",
+"Brachiopode": "To skall av ulik størrelse (overskallet er størst), men hvert skall er symmetrisk. Vanlig i paleozoikum.",
+"Musling": "Høyre og venstre skall er like, men speilvendte. Vanlig i mesozoikum og kenozoikum.",
+"Snegl": "Gastropode med spiralvridd skall. Fossilene er oftest marine.",
+"Echinoid (kråkebolle)": "Kråkebolle med 5-punkts symmetri. De fleste lever nedgravd i sedimentet.",
+"Crinoid (sjølilje)": "Sjølilje med stilk, beger og armer, 5-punkts symmetri. De ringformede stilkleddene er vanlige fossiler.",
+"Hornkorall": "Enkeltkorall (rugosa) formet som et horn. Paleozoisk.",
+"Bikakekorall": "Kolonikorall (tabulata, f.eks. Favosites) som ligner en honningkake. Lett å kjenne igjen. Paleozoisk.",
+"Nummulitt": "Verdens største encellede dyr: en stor, skiveformet foraminifer med kamre i spiral. Kenozoisk.",
+"Foraminiferer": "Encellede organismer med kalkskall, oftest mikrofossiler. Nummulitter er de største.",
+"Fiskefossil": "Skjelett, skjell eller tenner av fisk. Sjelden bevart i havet, oftest der innsjøer har tørket ut.",
+"Haitann": "Vanlig marint fiskefossil, særlig i kenozoikum.",
+"Plantefossil": "Avtrykk eller kullrester av planter (bregner, blader, stammer). Karbon-perm-plantene ble til kull.",
+"Bryozo (mosdyr)": "Kolonidyr med kalkskjelett som danner fine, blonde- eller vifteformede nett.",
+"Dinosaurben": "Bein og egg av dinosaurer. Utdødd ved slutten av mesozoikum (66 Ma).",
+"Konodont": "Mikrofossil: tannlignende deler fra et utdødd, ålelignende «konodontdyr». Brukes til datering.",
+"Kokkolitt": "Mikrofossil av CaCO₃ fra plankton. Krittstein består av kokkolitter.",
+"Granitt": "Grovkornet (faneritisk) felsisk dypbergart: kvarts, K-feltspat (ofte rosa), plagioklas og biotitt/hornblende.",
+"Rhyolitt": "Finkornet (afanittisk) felsisk vulkansk bergart, den vulkanske «tvillingen» til granitt. Lys farge.",
+"Dioritt": "Grovkornet intermediær dypbergart, «salt og pepper»: hvit plagioklas og svart hornblende, lite kvarts.",
+"Andesitt": "Finkornet intermediær vulkansk bergart, ofte grå og gjerne porfyrisk. Vanlig over subduksjonssoner.",
+"Gabbro": "Grovkornet mafisk dypbergart: Ca-plagioklas og pyroksen, mørk.",
+"Basalt": "Finkornet mafisk vulkansk bergart, alltid mørk. Ofte med blærerom. Havskorpen er basaltisk.",
+"Peridotitt": "Ultramafisk dypbergart av olivin (grønn) og pyroksen. Mantelens hovedbergart.",
+"Porfyr (porfyrisk tekstur)": "To tydelige kornstørrelser: store fenokrystaller i en finere grunnmasse. Viser to-trinns avkjøling.",
+"Obsidian": "Vulkansk glass med konkoidalt brudd. Sort selv om den er felsisk. Ikke et mineral (ingen krystallstruktur).",
+"Pimpstein": "Felsisk vulkansk glass så full av blærerom at den kan flyte på vann.",
+"Scoria (slagg)": "Mafisk, mørk vulkansk bergart full av blærerom, men tyngre enn pimpstein.",
+"Tuff": "Pyroklastisk bergart av vulkansk aske som har falt ned og blitt sammenkittet.",
+"Putelava": "Puteformet lava som størknet under vann. Typisk for havbunnen og ofiolitter.",
+"Sandstein": "Klastisk bergart av sandkorn (mest kvarts). Kan vise kryssjikt fra vind eller strøm.",
+"Kvartssandstein": "Moden sandstein av nesten bare kvarts, ofte rødlig av litt hematitt. Protolitt for kvartsitt.",
+"Konglomerat": "Klastisk bergart med grove, AVRUNDEDE korn (grus/stein), ofte kvartsboller. Lengre transport enn breksje.",
+"Breksje": "Klastisk bergart med grove, KANTETE fragmenter. Kort transport.",
+"Kalkstein": "Biokjemisk bergart av kalsitt (CaCO₃), ofte med fossiler. Bruser med saltsyre.",
+"Kull": "Organisk sedimentær bergart av sammenpressede planterester. Mest fra karbon og perm.",
+"Leirskifer (slate)": "Lavest metamorfosegrad av leirstein. Så finkornet at mineralene ikke synes. Spaltes i tynne plater (skiferkløv).",
+"Fyllitt": "Lavmetamorf, finkornet glimmerrik bergart med silkeglans. Mellom slate og glimmerskifer.",
+"Glimmerskifer": "Middels til høy grad. Synlige glimmerflak (muskovitt og/eller biotitt) gir skifrighet (schistosity).",
+"Granatglimmerskifer": "Glimmerskifer med granat som porfyroblaster (store nydannede krystaller).",
+"Gneis": "Høy grad. Lyse (kvarts, feltspat) og mørke (biotitt, hornblende) bånd.",
+"Migmatitt": "Delvis smeltet gneis på grensen mellom metamorf og magmatisk bergart. Lyse smeltepartier i mørkere gneis.",
+"Mylonitt": "Foliert forkastningsbergart fra duktil skjærdeformasjon, med redusert kornstørrelse.",
+"Metakonglomerat": "Metamorfosert konglomerat der bollene er strukket ut og flatet.",
+"Kvartsitt": "Metamorf kvartssandstein. Hard og glassaktig, ikke foliert. Bryter gjennom kornene.",
+"Marmor": "Metamorf kalkstein. Grovkrystallinsk kalsitt, ikke foliert. Fossiler og lagning er visket ut.",
+"Hornfels": "Finkornet, ikke-foliert kontaktmetamorf bergart (oftest fra leirstein).",
+"Amfibolitt": "Hornblende og plagioklas, svart og hvit. Fra basalt eller gabbro. Lite eller ikke foliert.",
+"Grønnskifer / grønnstein": "Lavgradig metamorf basalt/gabbro. Grønn pga. kloritt, epidot og aktinolitt. Vanlig i Trøndelag.",
+"Kvarts": "SiO₂, hardhet 7, ingen kløv, konkoidalt brudd, glassglans.",
+"Hornblende": "Svart amfibol med kløv på 60°/120°. Vannholdig.",
+"Feltspat": "Hardhet 6, to kløvretninger på ca. 90°. K-feltspat er ofte rosa, plagioklas ofte hvit.",
+"Kloritt": "Grønt, flakete sjiktsilikat (hardhet 2–2,5). Typisk i lavgradige metamorfe bergarter."
+}
+}

@@ -60,3 +60,7 @@ td,th{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertic
 .tutorForm{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line)}
 .tutorForm textarea{margin:0;resize:none}
 .q button.check{margin-top:8px}
+
+.qimg{display:block;max-width:100%;max-height:380px;margin:4px 0 10px;border-radius:8px;border:1px solid #0002;background:#fff;cursor:zoom-in}
+.gal{display:flex;flex-wrap:wrap;gap:8px}
+.gal img{height:150px;max-width:100%;object-fit:cover;border-radius:6px;border:1px solid #0002;background:#fff}

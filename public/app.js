@@ -8,6 +8,7 @@ const RECENT = 15;        // antall siste svar per tema som teller i estimatet
 const MIN_PER_TOPIC = 8;  // minst så mange svar per tema før estimatet regnes som sikkert
 const MARGIN = 5;         // prosentpoeng sikkerhetsmargin over grensen før «klar»
 const EXAM_LEN = 50;
+const IMG = p => (window.ASSET_BASE || "/img/") + p;
 
 let sb, user, profile = { target_grade: "C" }, answers = [], exams = [], view = "oversikt";
 
@@ -165,14 +166,14 @@ function roundFeedback(title, ok, n, prevPct) {
 }
 
 // ---------- navigasjon ----------
-const VIEWS = [["oversikt", "Min fremgang"], ["eksamen", "Prøveeksamen"], ["ekte", "Ekte eksamener"], ["tema", "Øv på tema"], ["svake", "Øv på svake punkter"], ["huskeliste", "Huskeliste"]];
+const VIEWS = [["oversikt", "Min fremgang"], ["eksamen", "Prøveeksamen"], ["ekte", "Ekte eksamener"], ["tema", "Øv på tema"], ["bilder", "Bildequiz"], ["svake", "Øv på svake punkter"], ["huskeliste", "Huskeliste"]];
 function renderTabs() {
   $("#tabs").innerHTML = VIEWS.map(([k, n]) => `<button data-v="${k}" class="${k === view ? "on" : ""}">${n}</button>`).join("");
   $("#tabs").querySelectorAll("button").forEach(b => b.onclick = () => show(b.dataset.v));
 }
 function show(v) {
   view = v; renderTabs(); window.scrollTo(0, 0);
-  ({ oversikt: viewOverview, eksamen: viewExamIntro, ekte: viewReal, tema: viewTopics, svake: viewWeak, huskeliste: () => $("#main").innerHTML = `<div class="cheat">${window.CHEAT}</div>` })[v]();
+  ({ oversikt: viewOverview, eksamen: viewExamIntro, ekte: viewReal, tema: viewTopics, bilder: viewImages, svake: viewWeak, huskeliste: () => $("#main").innerHTML = `<div class="cheat">${window.CHEAT}</div>` })[v]();
 }
 
 // ---------- oversikt ----------
@@ -233,6 +234,7 @@ function qHTML(q, k, practice = false, fixed = false) {
   const multi = isMulti(q);
   return `<div class="card q" id="q${k}"><div class="qh"><span>Spørsmål ${k + 1}${q.src ? ` · <span class="mut">${esc(q.src)}</span>` : ""}</span><span class="tag">${esc(q.t)}</span></div>
   <div class="qt">${q.q}</div>
+  ${q.img ? `<a href="${IMG(q.img)}" target="_blank" rel="noopener"><img class="qimg" src="${IMG(q.img)}" loading="lazy" alt="Bilde til spørsmålet"></a>` : ""}
   ${multi ? `<p class="note" style="margin:2px 0 6px">Velg alle som er riktige.</p>` : ""}
   ${order.map(i => `<label class="o" data-o="${i}"><input type="${multi ? "checkbox" : "radio"}" name="${multi ? "c" : "r"}${k}" value="${i}"><span>${o[i]}</span></label>`).join("")}
   ${multi && practice ? `<button class="btn sec small check" data-k="${k}">Sjekk svar</button>` : ""}
@@ -372,11 +374,76 @@ function viewReal() {
       <p class="mut">${runs.length ? `Tatt ${runs.length} gang${runs.length > 1 ? "er" : ""} · siste ${runs[0].score}/${runs[0].total} · beste ${best} % (${gradeOf(best)})` : "Ikke tatt ennå"}</p>
       <button class="btn" data-y="${y}">Start eksamen ${y}</button></div>`;
   }).join("");
-  $("#main").innerHTML = `<p class="mut">Dette er de to siste ordinære eksamenene i emnet, med samme foreleser. Spørsmål som bare kan besvares med et bilde (kart, figurer, steinprøver) er tatt ut, fordi bildene ikke er med. Utfyllings- og sorteringsoppgaver er gjort om til flervalg. Fasiten er laget ut fra pensum; den er ikke den offisielle.</p>
+  $("#main").innerHTML = `<p class="mut">Dette er de to siste ordinære eksamenene i emnet, med samme foreleser. Bildeoppgavene (steinprøver, figurer, strøk/fall-symboler) er med, med bildene fra eksamen. Klikk på et bilde for å se det i full størrelse. Utfyllings- og sorteringsoppgaver er gjort om til flervalg. Fra 2025 mangler oppgave 65 (feil i oppgavesettet) og 93–94 (dra-og-slipp på bilde). Fasiten er laget ut fra pensum; den er ikke den offisielle.</p>
   <p class="note">Spørsmålene finnes også i temaøvingen og i de tilfeldige prøveeksamenene, merket med eksamensår og oppgavenummer.</p>
   <div class="grid">${cards}</div>`;
   $("#main").querySelectorAll("[data-y]").forEach(b => b.onclick = () => startReal(b.dataset.y));
 }
 function startReal(y) {
   runExam(REAL[y].map(id => QBYID[id]), "real" + y, true, () => startReal(y));
+}
+
+// ---------- bildequiz (fossiler, bergarter, mineraler) ----------
+const IMGS = (window.IMAGES || { items: [], info: {} });
+const IMG_CATS = ["Fossiler", "Magmatiske bergarter", "Sedimentære bergarter", "Metamorfe bergarter", "Mineraler"];
+const IMG_TOPIC = { "Fossiler": "Fossiler og jordhistorie", "Magmatiske bergarter": "Magmatiske bergarter", "Sedimentære bergarter": "Sedimentære bergarter", "Metamorfe bergarter": "Metamorfe bergarter", "Mineraler": "Mineraler" };
+const IMG_ROUND = 20;
+let imgCat = "Alle", imgMode = "quiz";
+const namesIn = k => [...new Set(IMGS.items.filter(x => x.k === k).map(x => x.n))];
+function imgOptions(it) {
+  let pool = namesIn(it.k).filter(n => n !== it.n);
+  if (pool.length < 3) pool = pool.concat(shuffle([...new Set(IMGS.items.filter(x => x.k !== "Fossiler" && x.k !== it.k).map(x => x.n))]));
+  return shuffle([it.n, ...shuffle(pool).slice(0, 3)]);
+}
+function viewImages() {
+  const cnt = k => IMGS.items.filter(x => k === "Alle" || x.k === k).length;
+  $("#main").innerHTML = `<p class="mut">Kjenn igjen fossiler, bergarter og mineraler fra bilder. Bildene er hentet fra forelesningene, eksamen 2025 og tegningene fra eksamen 2021 (oppg. 5). Du får ${IMG_ROUND} bilder om gangen med fasit med én gang, og bilder du har bommet på kommer først neste gang.</p>
+  <div class="row">${["Alle", ...IMG_CATS].map(k => `<button class="btn sec ${k === imgCat ? "on" : ""}" data-k="${esc(k)}">${esc(k)} <span class="mut">· ${cnt(k)}</span></button>`).join("")}</div>
+  <div class="row"><button class="btn small ${imgMode === "quiz" ? "" : "sec"}" data-m="quiz">Quiz</button><button class="btn small ${imgMode === "galleri" ? "" : "sec"}" data-m="galleri">Se alle bildene (pugg)</button></div>
+  <div id="practice"></div>`;
+  $("#main").querySelectorAll("[data-k]").forEach(b => b.onclick = () => { imgCat = b.dataset.k; viewImages(); });
+  $("#main").querySelectorAll("[data-m]").forEach(b => b.onclick = () => { imgMode = b.dataset.m; viewImages(); });
+  imgMode === "quiz" ? runImageQuiz() : imageGallery();
+}
+function imageGallery() {
+  const items = IMGS.items.filter(x => imgCat === "Alle" || x.k === imgCat);
+  const groups = (imgCat === "Alle" ? IMG_CATS : [imgCat]).map(k => {
+    const names = [...new Set(items.filter(x => x.k === k).map(x => x.n))].sort((a, b) => a.localeCompare(b, "no"));
+    if (!names.length) return "";
+    return `<h2>${esc(k)}</h2>${names.map(n => `<div class="card"><b>${esc(n)}</b><p class="note" style="margin:4px 0 8px">${esc(IMGS.info[n] || "")}</p>
+      <div class="gal">${items.filter(x => x.n === n).map(x => `<a href="${IMG(x.f)}" target="_blank" rel="noopener"><img src="${IMG(x.f)}" loading="lazy" alt="${esc(n)}"></a>`).join("")}</div></div>`).join("")}`;
+  }).join("");
+  $("#practice").innerHTML = groups;
+}
+function runImageQuiz() {
+  const pool = IMGS.items.filter(x => imgCat === "Alle" || x.k === imgCat);
+  const last = lastResult();
+  const score = x => { const l = last[x.id]; return (!l ? 2 : l.correct ? 0 : 3) + Math.random() * 1.5; };
+  const qs = pool.map(x => [score(x), x]).sort((a, b) => b[0] - a[0]).slice(0, IMG_ROUND).map(x => x[1]);
+  let ok = 0, done = 0;
+  const host = $("#practice");
+  host.innerHTML = `<div class="card sticky" id="score"></div>${qs.map((it, k) => {
+    const o = imgOptions(it);
+    return `<div class="card q" id="q${k}"><div class="qh"><span>Bilde ${k + 1}${it.src ? ` · <span class="mut">${esc(it.src)}</span>` : ""}</span><span class="tag">${esc(it.k)}</span></div>
+      <div class="qt">Hva er dette? / What is this?</div>
+      <a href="${IMG(it.f)}" target="_blank" rel="noopener"><img class="qimg" src="${IMG(it.f)}" loading="lazy" alt="Hva er dette?"></a>
+      ${o.map(n => `<label class="o" data-n="${esc(n)}"><input type="radio" name="r${k}" value="${esc(n)}"><span>${esc(n)}</span></label>`).join("")}
+      <div class="ex"><b>Fasit:</b> ${esc(it.n)}<br>${esc(IMGS.info[it.n] || "")}</div></div>`;
+  }).join("")}<div class="row"><button class="btn sec" id="again">Nytt sett</button><button class="btn sec" id="toGal">Se alle bildene</button></div>`;
+  const sc = () => $("#score").innerHTML = `<b>Bildequiz · ${esc(imgCat)}</b> · ${done} av ${qs.length} besvart · <b>${ok} riktige</b>${done ? ` (${Math.round(100 * ok / done)} %)` : ""}${done === qs.length ? `<div style="margin-top:6px">${ok === qs.length ? "Alt riktig! Prøv en annen kategori, eller ta et nytt sett." : "Ta et nytt sett: bildene du bommet på kommer først. Under «Se alle bildene» kan du pugge navnene."}</div>` : ""}`;
+  sc();
+  qs.forEach((it, k) => {
+    const d = $("#q" + k);
+    d.addEventListener("change", e => {
+      if (d.classList.contains("done")) return;
+      const v = e.target.value, right = v === it.n;
+      d.classList.add("done");
+      d.querySelectorAll("label.o").forEach(l => { l.classList.toggle("ok", l.dataset.n === it.n); l.classList.toggle("bad", l.dataset.n === v && !right); });
+      d.querySelectorAll("input").forEach(x => x.disabled = true);
+      done++; if (right) ok++; sc();
+      logAnswers([{ question_id: it.id, topic: IMG_TOPIC[it.k], correct: right, mode: "topic" }]);
+    });
+  });
+  $("#again").onclick = () => { window.scrollTo(0, 0); runImageQuiz(); };
+  $("#toGal").onclick = () => { imgMode = "galleri"; viewImages(); };
 }
